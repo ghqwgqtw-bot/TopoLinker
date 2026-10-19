@@ -1,0 +1,91 @@
+defaults:
+  - base
+  - _self_
+
+experiment:
+  seed: 2026
+  log_freq: 200
+  # both/generate/evaluate
+  eval_mode: both
+
+  # 第二阶段单独命名，避免和第一阶段目录混在一起
+  name: test_rl_final
+
+  # 关键：这里填第一阶段保存的 best，不要填 rl_epoch_8.pth
+  weight_path: ./weights/rl_best_final.pth
+
+  # 第二阶段短跑，不要跑太久
+  num_rl_epoch: 4
+  rl_batch_size: 16
+  rl_learning_rate: 0.0000003
+
+  # Flow Matching PPO
+  flow_t_end: 0.95
+  flow_denom_min: 0.05
+  rl_action_std: 0.02
+  ppo_t_indices: 12
+
+  # PPO 更保守一点
+  ppo_clip: 0.1
+  kl_coef: 0.05
+  entropy_coef: 0
+  vf_coef: 0.5
+  max_grad_norm: 1.0
+  ppo_epochs: 2
+
+  # bond reconstruction in RL reward
+  rl_pred_bond_threshold: 0.5
+  rl_pred_bond_max_new_bonds_per_atom: 4
+  rl_pred_bond_min_dist: 0.75
+  rl_pred_bond_max_dist: 2.2
+
+  # 第二阶段 reward 权重
+  reward_strict_topology_weight: 0.05
+  reward_degradation_weight: 0.10
+  reward_high_degradation_weight: 0.4
+  reward_ternary_weight: 0.45
+  ternary_reward_scale: 2.0
+  # Stage 2:
+  # 没有 DeepTernary 信息的样本不伪造 ternary score，
+  # 而是对该样本剩余有效 reward 权重重新归一化
+  renormalize_missing_ternary: true
+
+  # PROTAC-STAN reward
+  use_protac_stan_reward: true
+  protac_stan_project_dir: ./PROTAC-STAN-main
+  protac_stan_model_path: ./PROTAC-STAN-main/saved_models/protac-stan.pt
+  protac_stan_config_path: ./PROTAC-STAN-main/config.toml
+  protac_stan_esm_map_path: ./datasets/rl/esm_s_map.pkl
+  protac_stan_tmp_root: ./tmp1/protac_stan_reward_stage2
+  protac_stan_descriptor_stats_path: ./datasets/rl/descriptor_stats.pkl
+
+  # DeepTernary reward
+  use_deepternary_reward: true
+  deepternary_python: current
+  deepternary_project_dir: ./DeepTernary-master
+  deepternary_predict_script: ./DeepTernary-master/predict.py
+  deepternary_tmp_root: ./tmp1/deepternary_reward_stage2
+  deepternary_seeds: 1
+  deepternary_timeout: 600
+  deepternary_max_samples: null
+
+  # final test evaluation
+  test_num_samples: 5
+  test_batch_size: 32
+
+  linker_size_offset: 0
+
+  degradation_threshold: 0.5
+  protac_stan_batch_size: 32
+
+  novelty_on: linker
+  recovery_on: linker
+  uniqueness_group: case
+
+  sa_filter_mode: threshold
+  sa_threshold: 6.0
+
+  reference_linker_smiles_path: ./datasets/reference_linkers.smi
+  reference_mol_smiles_path: null
+
+  test_deepternary_max_samples: null
